@@ -1,0 +1,31 @@
+{
+  "name": "vkrtecek/table",
+  "type": "library",
+  "description": "Basic table builder.",
+  "homepage": "https://github.com/vkrtecek/table",
+  "keywords": [ "table" ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Štěpán Krteček",
+      "email": "krtek@zlin6.cz"
+    }
+  ],
+  "require": {
+    "php": ">=7.0.0",
+    "donquixote/cellbrush": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~5.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "Vkrtecek\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Test\\": "tests/"
+    }
+  }
+}

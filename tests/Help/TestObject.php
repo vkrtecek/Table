@@ -9,7 +9,7 @@
 namespace Test\Help;
 
 
-class Object
+class TestObject
 {
     /** @var int */
     private $id;
@@ -32,9 +32,9 @@ class Object
 
     /**
      * @param int $id
-     * @return Object
+     * @return TestObject
      */
-    public function setId(int $id): Object
+    public function setId(int $id): TestObject
     {
         $this->id = $id;
         return $this;
@@ -50,9 +50,9 @@ class Object
 
     /**
      * @param string $name
-     * @return Object
+     * @return TestObject
      */
-    public function setName(string $name): Object
+    public function setName(string $name): TestObject
     {
         $this->name = $name;
         return $this;
@@ -68,9 +68,9 @@ class Object
 
     /**
      * @param string $surname
-     * @return Object
+     * @return TestObject
      */
-    public function setSurname(string $surname): Object
+    public function setSurname(string $surname): TestObject
     {
         $this->surname = $surname;
         return $this;
@@ -86,9 +86,9 @@ class Object
 
     /**
      * @param int $age
-     * @return Object
+     * @return TestObject
      */
-    public function setAge(int $age): Object
+    public function setAge(int $age): TestObject
     {
         $this->age = $age;
         return $this;
@@ -104,9 +104,9 @@ class Object
 
     /**
      * @param string $language
-     * @return Object
+     * @return TestObject
      */
-    public function setLanguage(string $language): Object
+    public function setLanguage(string $language): TestObject
     {
         $this->language = $language;
         return $this;

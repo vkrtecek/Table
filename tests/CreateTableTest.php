@@ -50,9 +50,9 @@ class CreateTableTest extends TestCase
             '    <form method="GET" action="http://localhost" id="input-limit-pattern-form">' . self::PHP_EOL .
             '      <input type="hidden" name="sort_by" value="" />' . self::PHP_EOL .
             '      <input type="hidden" name="sort" value="ASC" />' . self::PHP_EOL .
-            '      <input type="number" step="1" name="limit" id="limit" value="15">' . self::PHP_EOL .
+            '      <input type="hidden" step="1" name="limit" id="limit" value="15">' . self::PHP_EOL .
             '      <input type="hidden" name="page" value="1" />' . self::PHP_EOL .
-            '      <input type="text" name="pattern" value="" id="pattern" placeholder="Search by" />' . self::PHP_EOL .
+            '      <input type="hidden" name="pattern" value="" id="pattern" placeholder="Search by" />' . self::PHP_EOL .
             '      <input type="hidden" name="q" value="false" />' . self::PHP_EOL .
             '      <button hidden="hidden"></button>' . self::PHP_EOL .
             '    </form>' . self::PHP_EOL .
@@ -67,7 +67,7 @@ class CreateTableTest extends TestCase
             '    <tr class="odd"><td class="">3</td><td class="">Paul</td><td class="">13</td></tr>' . self::PHP_EOL .
             '  </tbody>' . self::PHP_EOL .
             '</table>' . self::PHP_EOL .
-            '<div id="listing"><span class="listing-page" id="listing-selected">1</span></div></div>';
+            '<div id="listing"></div></div>';
         
         $this->assertEquals($expected, $table->renderHTML());
     }

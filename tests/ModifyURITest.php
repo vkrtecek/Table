@@ -18,7 +18,7 @@ class ModifyURITest extends CreateTableTest
         $table = Table::create($this->data)
             ->addColumn('ID')->setProperty('id')
             ->addColumn('Name')->setProperty('name')
-            ->addColumn('Age')->setSearchable()->setProperty('age')
+            ->addColumn('Age')->setProperty('age')
         ->setNavigationNames([
             'limit' => 'počet_prvků',
             'orderBy' => 'řadit_podle',
@@ -34,9 +34,9 @@ class ModifyURITest extends CreateTableTest
             '    <form method="GET" action="http://skeleton.com" id="input-limit-pattern-form">' . self::PHP_EOL .
             '      <input type="hidden" name="řadit_podle" value="" />' . self::PHP_EOL .
             '      <input type="hidden" name="řadit" value="ASC" />' . self::PHP_EOL .
-            '      <input type="number" step="1" name="počet_prvků" id="limit" value="15">' . self::PHP_EOL .
+            '      <input type="hidden" step="1" name="počet_prvků" id="limit" value="15">' . self::PHP_EOL .
             '      <input type="hidden" name="stránka" value="1" />' . self::PHP_EOL .
-            '      <input type="text" name="vzor" value="" id="pattern" placeholder="Search by Age" />' . self::PHP_EOL .
+            '      <input type="hidden" name="vzor" value="" id="pattern" placeholder="Search by" />' . self::PHP_EOL .
             '      <input type="hidden" name="q" value="false" />' . self::PHP_EOL .
             '      <button hidden="hidden"></button>' . self::PHP_EOL .
             '    </form>' . self::PHP_EOL .
@@ -51,7 +51,7 @@ class ModifyURITest extends CreateTableTest
             '    <tr class="odd"><td class="">3</td><td class="">Paul</td><td class="">13</td></tr>' . self::PHP_EOL .
             '  </tbody>' . self::PHP_EOL .
             '</table>' . self::PHP_EOL .
-            '<div id="listing"><span class="listing-page" id="listing-selected">1</span></div></div>';
+            '<div id="listing"></div></div>';
 
         $this->assertEquals($expected, $table->renderHTML());
     }

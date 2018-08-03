@@ -14,8 +14,6 @@ namespace Vkrtecek\Table;
  */
 class Table
 {
-    /** @var \Donquixote\Cellbrush\Table\Table */
-    private $table;
     /** @var Column[] */
     private $cols = [];
 	/** @var @var Html */
@@ -36,7 +34,6 @@ class Table
      */
     private function __construct(array $data)
     {
-        $this->table = \Donquixote\Cellbrush\Table\Table::create();
         $this->insertData($data);
         $this->htmlTable = new Html($this);
     }
@@ -103,16 +100,18 @@ class Table
      */
     public function renderHTML(array $config = []): string
     {
-        //add HEAD
-        $this->table->thead()->addRowName('_head');
-        foreach ($this->cols as $col)
-            $this->table->thead()->th('_head', $col->getName(), $this->htmlTable->printHeadForCol($col));
+        $table = \Donquixote\Cellbrush\Table\Table::create();
 
-        $this->table->tbody();
+        //add HEAD
+        $table->thead()->addRowName('_head');
+        foreach ($this->cols as $col)
+            $table->thead()->th('_head', $col->getName(), $this->htmlTable->printHeadForCol($col));
+
+        $table->tbody();
 
         //add cols
         foreach ($this->cols as $col) {
-            $this->table->addColName($col->getName())
+            $table->addColName($col->getName())
                 ->addColClass($col->getName(), $col->getClass());
         }
 
@@ -121,19 +120,19 @@ class Table
         $rows = $this->htmlTable->filterRows($this->rows, $this->cols);
         $rows = $this->htmlTable->getRowsFromPage($rows);
         foreach ($rows as $row) {
-            $this->table->addRowName('row_' . $i);
+            $table->addRowName('row_' . $i);
             foreach ($this->cols as $col)
-                $this->table->td('row_' . $i, $col->getName(), $col->getContent($row));
+                $table->td('row_' . $i, $col->getName(), $col->getContent($row));
             ++$i;
         }
 
         
-        $this->table->addRowStriping();
+        $table->addRowStriping();
 
         return '<div id="users-table">' .
                 (isset($config['css']) && $config['css'] ? '<style type="text/css">' . $this->renderCSS() . '</style>' : '') .
                 $this->printNavigation() .
-                $this->table->render() . 
+                $table->render() .
                 $this->printListing() .
             '</div>';
     }

@@ -1,0 +1,101 @@
+@import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);
+
+
+/* NAVIGATION */
+div#users-table div#table-navigation-forms form{
+    display: inline;
+    margin: 0.1rem 0 1.2rem 0;
+}
+div#users-table div#table-navigation-forms form input{
+    padding: 0.2rem 0 0.2rem 1rem;
+    border-radius: 5px;
+}
+div#users-table div#table-navigation-forms #input-limit-pattern-form #limit {
+    float: left;
+    margin-left: 10%;
+    width: 15%;
+    margin-bottom: 2.3rem;
+}
+div#users-table div#table-navigation-forms #input-limit-pattern-form #pattern {
+    float: right;
+    margin-right: 10%;
+    width: 55%;
+    margin-bottom: 2.3rem;
+    padding-left: 0.2rem;
+}
+div#users-table div#table-navigation-forms input:focus {
+    border-color: #98cbe8;
+}
+
+
+
+/* TABLE */
+div#users-table {
+    font-family: Raleway,sans-serif;
+}
+div#users-table form.action-form {
+    display: inline;
+}
+div#users-table .red {
+    color: red;
+}
+div#users-table .green {
+    color: green;
+}
+
+
+div#users-table {
+    margin: auto;
+    text-align: center;
+    display: inline-block;
+}
+
+
+
+
+
+/* LISTING */
+div#users-table table {
+    margin-top: 1rem;
+}
+div#users-table table thead tr {
+    border-top: solid #d5d5d5 1px;
+}
+div#users-table table tr {
+    border-bottom: solid #d5d5d5 1px;
+}
+div#users-table table tbody tr:hover {
+    background-color: #edefef;
+}
+div#users-table table td, table th {
+    padding: 0.5rem 2.5rem 0.5rem 1.2rem;
+}
+div#users-table table th {
+    text-align: center;
+}
+div#users-table tr.odd {
+    background-color: #efeff5;
+}
+div#users-table td.actions{
+    text-align: left;
+}
+
+
+
+div#users-table div#listing {
+    text-align: center;
+    margin: 1rem 0 0 0;
+}
+div#users-table span.listing-page {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border: #ddd 1px solid;
+    font-size: 125%;
+    color: #2a88bd;
+}
+div#users-table span#listing-selected {
+    background-color: #2a88bd;
+    color: #fff;
+    border: #2a88bd 1px solid;
+}

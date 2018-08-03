@@ -18,6 +18,10 @@ class Table
     private $table;
     /** @var Column[] */
     private $cols = [];
+	/** @var @var Html */
+    private $htmlTable;
+    /** @var bool */
+    private $listing = false;
 
     /**
      * Rows of table
@@ -34,6 +38,7 @@ class Table
     {
         $this->table = \Donquixote\Cellbrush\Table\Table::create();
         $this->insertData($data);
+        $this->htmlTable = new Html($this);
     }
 
     /**
@@ -82,37 +87,120 @@ class Table
     }
 
     /**
+     * @return Table
+     */
+    public function enableListing(): Table {
+        $this->listing = true;
+        return $this;
+    }
+
+    /**
+     * @param array $config = array(
+     *      'css' => [bool]
+     * );
      * @return string HTML output
      * @throws \Exception
      */
-    public function renderHTML(): string
+    public function renderHTML(array $config = []): string
     {
-        foreach ($this->cols as $col) {
-            $this->table->addColName($col->getName());
-        }
-
-        for ($i = 0; $i < count($this->rows); $i++) {
-            $this->table->addRowName('row_' . $i);
-            foreach ($this->cols as $col)
-                $this->table->td('row_' . $i, $col->getName(), $col->getContent($this->rows[$i])/*$this->rows[$i]->{$col->getter()}()*/);
-        }
-
         //add HEAD
         $this->table->thead()->addRowName('_head');
         foreach ($this->cols as $col)
-            $this->table->thead()->th('_head', $col->getName(), $col->getName());
+            $this->table->thead()->th('_head', $col->getName(), $this->htmlTable->printHeadForCol($col));
+
+        $this->table->tbody();
+
+        //add cols
+        foreach ($this->cols as $col) {
+            $this->table->addColName($col->getName())
+                ->addColClass($col->getName(), $col->getClass());
+        }
+
+        //add rows
+		$i = 0;
+        $rows = $this->htmlTable->filterRows($this->rows, $this->cols);
+        $rows = $this->htmlTable->getRowsFromPage($rows);
+        foreach ($rows as $row) {
+            $this->table->addRowName('row_' . $i);
+            foreach ($this->cols as $col)
+                $this->table->td('row_' . $i, $col->getName(), $col->getContent($row));
+            ++$i;
+        }
+
+        
         $this->table->addRowStriping();
 
-        return $this->table->render();
+        return '<div id="users-table">' .
+                (isset($config['css']) && $config['css'] ? '<style type="text/css">' . $this->renderCSS() . '</style>' : '') .
+                $this->printNavigation() .
+                $this->table->render() . 
+                $this->printListing() .
+            '</div>';
     }
-
 
 
 
     /**
      * @return string
      */
+    private function printNavigation(): string {
+        return $this->htmlTable->getNavigation($this->cols);
+    }
+
+    /**
+     * @return string
+     */
+    private function printListing(): string {
+        $rows = $this->htmlTable->filterRows($this->rows, $this->cols);
+        return $this->htmlTable->getListing($rows);
+    }
+
+    /**
+     * @return string
+     */
     public function renderCSS(): string {
-        return '<style type="text/css"></style>';
+        return $this->htmlTable->getCss();
+    }
+
+	/**
+	 * $data = [
+	 * 		'limit' => 'limit',
+	 * 		'orderBy' => 'order_by',
+	 * 		'order' => 'order',
+	 * 		'pattern' = > 'pattern',
+	 * 		'page' => 'page',
+	 * 		'url' => 'url'
+	 * ];
+	 *
+	 * @param array $data
+	 * @return Table
+	 */
+    public function setNavigationNames(array $data): Table {
+		if (isset($data['limit']) && isset($data['limit']) != "")
+			$this->htmlTable->setLimit($data['limit']);
+
+		if (isset($data['page']) && isset($data['page']) != "")
+			$this->htmlTable->setPage($data['page']);
+
+		if (isset($data['orderBy']) && isset($data['orderBy']) != "")
+			$this->htmlTable->setOrderBy($data['orderBy']);
+
+		if (isset($data['order']) && isset($data['order']) != "")
+			$this->htmlTable->setOrder($data['order']);
+
+		if (isset($data['pattern']) && isset($data['pattern']) != "")
+			$this->htmlTable->setPattern($data['pattern']);
+
+		if (isset($data['url']) && isset($data['url']) != "")
+			$this->htmlTable->setUrl($data['url']);
+
+		return $this;
+	}
+
+    /**
+     * @return bool
+     */
+	public function hasListing(): bool {
+        return $this->listing;
     }
 }

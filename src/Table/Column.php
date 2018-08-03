@@ -16,16 +16,22 @@ class Column
     /** @var string */
     private $name;
     /** @var string */
-    private $property;
+    private $property = NULL;
+    /** @var string */
+    private $html_class = '';
     /** @var callable|null */
     private $func = NULL;
+	/** @var bool */
+	private $searchable = false;
+	/** @var bool */
+	private $orderable = false;
 
     /**
      * Column constructor.
      * @param Table $table
      * @param string $name
      */
-    public function __construct(Table $table, $name) {
+    public function __construct(Table $table, string $name) {
         $this->table = $table;
         $this->name = $name;
     }
@@ -36,10 +42,16 @@ class Column
     }
 
     /**
+     * @return string
+     */
+    public function getProperty(): string {
+        return $this->property;
+    }
+    /**
      * @param string $prop
      * @return Table
      */
-    public function setProperty($prop): Table {
+    public function setProperty(string $prop): Table {
         $this->property = $prop;
         return $this->table;
     }
@@ -51,6 +63,21 @@ class Column
     public function setContent(callable $function): Table {
         $this->func = $function;
         return $this->table;
+    }
+
+    /**
+    * @return string
+    */
+    public function getClass(): string {
+        return $this->html_class;
+    }
+    /**
+     * @var string $className
+     * @return Column
+     */
+    public function setClass(string $className): Column {
+        $this->html_class = $className;
+        return $this;
     }
 
     /**
@@ -67,7 +94,41 @@ class Column
      * if property is age, so function returns getAge
      * @return string
      */
-    public function getter(): string {
-        return 'get' . ucfirst($this->property);
+    private function getter(): string {
+        return $this->property
+            ? 'get' . ucfirst($this->property)
+            : '';
     }
+
+	/**
+	 * @return Column
+	 */
+	public function setSearchable(): Column {
+		$this->searchable = true;
+		return $this;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isSearchable(): bool {
+		return $this->searchable;
+	}
+
+	/**
+	 * @return Column
+	 */
+	public function setOrderable(): Column {
+		$this->orderable = true;
+		return $this;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isOrderable(): bool {
+		return $this->orderable;
+	}
+
+
 }

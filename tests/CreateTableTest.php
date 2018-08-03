@@ -18,6 +18,7 @@ class CreateTableTest extends TestCase
     const PHP_EOL = "\n";
 
     protected function prepareData() {
+        $_SERVER['HTTP_HOST'] = 'localhost';
         $i = 0;
         $this->data = [
             (new TestObject())->setId(++$i)->setName('John')->setSurname('McCaul')->setAge(38)->setLanguage('ENG'),
@@ -40,20 +41,33 @@ class CreateTableTest extends TestCase
         $table = Table::create($this->data)->addColumn('ID')->setContent(function(TestObject $obj) {
             return $obj->getId();
         })
-            ->addColumn('Name')->setProperty('name')
-            ->addColumn('Age')->setProperty('age');
+        ->addColumn('Name')->setProperty('name')
+        ->addColumn('Age')->setProperty('age');
 
         $expected =
-'<table>' . self::PHP_EOL .
-'  <thead>' . self::PHP_EOL .
-'    <tr><th>ID</th><th>Name</th><th>Age</th></tr>' . self::PHP_EOL .
-'  </thead>' . self::PHP_EOL .
-'  <tbody>' . self::PHP_EOL .
-'    <tr class="odd"><td>1</td><td>John</td><td>38</td></tr>' . self::PHP_EOL .
-'    <tr class="even"><td>2</td><td>Susane</td><td>35</td></tr>' . self::PHP_EOL .
-'    <tr class="odd"><td>3</td><td>Paul</td><td>13</td></tr>' . self::PHP_EOL .
-'  </tbody>' . self::PHP_EOL .
-'</table>' . self::PHP_EOL;
+            '<div id="users-table">' . self::PHP_EOL .
+            '  <div id="table-navigation-forms">' . self::PHP_EOL .
+            '    <form method="GET" action="http://localhost" id="input-limit-pattern-form">' . self::PHP_EOL .
+            '      <input type="hidden" name="sort_by" value="" />' . self::PHP_EOL .
+            '      <input type="hidden" name="sort" value="ASC" />' . self::PHP_EOL .
+            '      <input type="number" step="1" name="limit" id="limit" value="15">' . self::PHP_EOL .
+            '      <input type="hidden" name="page" value="1" />' . self::PHP_EOL .
+            '      <input type="text" name="pattern" value="" id="pattern" placeholder="Search by" />' . self::PHP_EOL .
+            '      <input type="hidden" name="q" value="false" />' . self::PHP_EOL .
+            '      <button hidden="hidden"></button>' . self::PHP_EOL .
+            '    </form>' . self::PHP_EOL .
+            '  </div>' . self::PHP_EOL .
+            '<table>' . self::PHP_EOL .
+            '  <thead>' . self::PHP_EOL .
+            '    <tr><th class="">ID</th><th class="">Name</th><th class="">Age</th></tr>' . self::PHP_EOL .
+            '  </thead>' . self::PHP_EOL .
+            '  <tbody>' . self::PHP_EOL .
+            '    <tr class="odd"><td class="">1</td><td class="">John</td><td class="">38</td></tr>' . self::PHP_EOL .
+            '    <tr class="even"><td class="">2</td><td class="">Susane</td><td class="">35</td></tr>' . self::PHP_EOL .
+            '    <tr class="odd"><td class="">3</td><td class="">Paul</td><td class="">13</td></tr>' . self::PHP_EOL .
+            '  </tbody>' . self::PHP_EOL .
+            '</table>' . self::PHP_EOL .
+            '<div id="listing"><span class="listing-page" id="listing-selected">1</span></div></div>';
         
         $this->assertEquals($expected, $table->renderHTML());
     }

@@ -103,12 +103,12 @@ so the result will look like
 We can specify a callback function instead of property:
 ```php
 $table->addColumn('Name')->setContent(function (TestObject $obj) {
-    return '<strong class="red">' . $obj->getName() . '</strong>';
+    return '<em class="red">' . $obj->getName() . '</em>';
 });
 ``` 
 <table>
   <thead>
-    <tr><th>ID of person</th><th>Name</th><th><a href="http://table.local?sort_by=Age&sort=ASC&limit=15&page=1&pattern=">Age</a></th></tr>
+    <tr><th>ID of person</th><th>Name</th><th>Age</th></tr>
   </thead>
   <tbody>
     <tr class="odd"><td>1</td><td><em class="red">John</em></td><td>38</td></tr>

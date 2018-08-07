@@ -23,6 +23,18 @@ class TestObject
     private $language;
 
     /**
+     * @param int $id
+     * @param string $name
+     * @param string $surname
+     * @param int $age
+     * @param string $language
+     * @return TestObject
+     */
+    public static function create(int $id, string $name, string $surname, int $age, string $language): self {
+        return (new self)->setId($id)->setName($name)->setSurname($surname)->setAge($age)->setLanguage($language);
+    }
+
+    /**
      * @return int
      */
     public function getId(): int

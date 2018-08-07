@@ -93,14 +93,16 @@ class Html
         if (isset($_GET[$this->orderBy]) && $_GET[$this->orderBy] != '') {
             $this->sortingCol = $cols[$_GET[$this->orderBy]];
 
-            usort($result, function ($a, $b) {
+            $sortingFunction = $this->sortingCol->getOrderableFunction() ?: function ($a, $b) {
                 return ($this->sortingCol->getContent($a) > $this->sortingCol->getContent($b) ? 1 : -1) * ($this->getOrder() == self::DEFAULT_ORDER ? -1 : 1);
-            });
+            };
+            usort($result, $sortingFunction);
         }
         return $result;
     }
 
     /**
+     * returns array of items for specific page
      * @param object[] $rows
      * @return object[]
      */
@@ -115,12 +117,14 @@ class Html
 
     /**
      * @param object[] $rows
+     * @param int|null $itemsCnt
      * @return string
      */
-	public function getListing(array $rows): string {
+	public function getListing(array $rows, int $itemsCnt = null): string {
 	    $ret = '<div id="listing">';
 	    $listing = '';
-	    for ($i = 1; $i <= ceil(count($rows) / $this->getLimit()); $i++) {
+        $itemsCnt = $itemsCnt ? $itemsCnt : count($rows);
+	    for ($i = 1; $i <= ceil($itemsCnt / $this->getLimit()); $i++) {
 	        if ($i == $this->getPage())
 	            $listing .=  '<span class="listing-page" id="listing-selected">' . $i . '</span>';
 	        else
@@ -269,6 +273,7 @@ class Html
 	}
 
     /**
+     * switch from DESC to ASC and back
      * @return string
      */
     private function switchOrder(): string {

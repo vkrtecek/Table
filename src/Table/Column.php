@@ -25,6 +25,8 @@ class Column
 	private $searchable = false;
 	/** @var bool */
 	private $orderable = false;
+	/** @var callable */
+	private $orderFunction = null;
 
     /**
      * Column constructor.
@@ -116,9 +118,11 @@ class Column
 	}
 
 	/**
+     * @param callable|null $function
 	 * @return Column
 	 */
-	public function setOrderable(): Column {
+	public function setOrderable(callable $function = null): Column {
+	    $this->orderFunction = $function;
 		$this->orderable = true;
 		return $this;
 	}
@@ -130,5 +134,10 @@ class Column
 		return $this->orderable;
 	}
 
-
+    /**
+     * @return callable|null
+     */
+    public function getOrderableFunction() {
+	    return $this->orderFunction;
+    }
 }

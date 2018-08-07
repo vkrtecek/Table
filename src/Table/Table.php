@@ -20,6 +20,8 @@ class Table
     private $htmlTable;
     /** @var bool */
     private $listing = false;
+    /** @var int */
+    private $itemsCount = null;
 
     /**
      * Rows of table
@@ -42,8 +44,7 @@ class Table
      * @param array|NULL $data
      * @return Table
      */
-    public static function create(array $data = NULL): Table
-    {
+    public static function create(array $data = []): Table {
         return new self($data ? $data : []);
     }
 
@@ -117,8 +118,13 @@ class Table
 
         //add rows
 		$i = 0;
-        $rows = $this->htmlTable->filterRows($this->rows, $this->cols);
-        $rows = $this->htmlTable->getRowsFromPage($rows);
+        if ($this->itemsCount === null) {
+            //itemsCount is not specified so library must filter rows
+            $rows = $this->htmlTable->filterRows($this->rows, $this->cols);
+            $rows = $this->htmlTable->getRowsFromPage($rows);
+        } else {
+            $rows = $this->rows;
+        }
         foreach ($rows as $row) {
             $table->addRowName('row_' . $i);
             foreach ($this->cols as $col)
@@ -151,7 +157,7 @@ class Table
      */
     private function printListing(): string {
         $rows = $this->htmlTable->filterRows($this->rows, $this->cols);
-        return $this->htmlTable->getListing($rows);
+        return $this->htmlTable->getListing($rows, $this->itemsCount);
     }
 
     /**
@@ -201,5 +207,14 @@ class Table
      */
 	public function hasListing(): bool {
         return $this->listing;
+    }
+
+    /**
+     * @param int $number
+     * @return Table
+     */
+    public function setTotalItemCount(int $number): Table {
+        $this->itemsCount = $number;
+	    return $this;
     }
 }

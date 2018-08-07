@@ -54,7 +54,7 @@ $data = [
 ];
 
 $table = \Vkrtecek\Table\Table::create($data)
-   ->addColumn('ID')->setProperty('id')
+   ->addColumn('ID of person')->setProperty('id')
    ->addColumn('Name')->setProperty('name')
    ->addColumn('Age')->setProperty('age');
                 
@@ -62,7 +62,7 @@ $table = \Vkrtecek\Table\Table::create($data)
 
 The string passed by ``` setProperty() ``` must be the same string as signature of property's getter without ```get```. So for example if the TestObject has method ```getAge()```, ```setProperty()``` must pass string ```'age'``` or ```'Age'```.
 
-And in your blade.php call:
+And in your View call:
 
 ```php
 <style>
@@ -100,7 +100,7 @@ so the result will look like
 ### Advanced
 
 #### Callbacks
-We can specify a callback function instead of property:
+We can specify a callback function instead of property name:
 ```php
 $table->addColumn('Name')->setContent(function (TestObject $obj) {
     return '<em class="red">' . $obj->getName() . '</em>';
@@ -120,7 +120,7 @@ $table->addColumn('Name')->setContent(function (TestObject $obj) {
   </tbody>
 </table>
 
-But on of the ```setProperty()``` and ```setContent()``` must be specified. 
+But one of the ```setProperty()``` and ```setContent()``` must be specified. 
 
 #### Sorting and filtering table data
 
@@ -129,6 +129,7 @@ Sometimes we need sort data by some attribute:
 $table->addColumn('Name')->setOrderable()->setProperty('name');
 ```
 and now by clicking on the table column header, we can sort the rows by this column.
+Or ```setOrderable()``` pass one parameter of type callable to specify the style of sorting.
 
 By typing code below the field for filtering of specific column data will appear:
 ```php
@@ -140,7 +141,6 @@ If we don't want to show all rows and enable paging, which will render input for
 $table->enableListing();
 ```
 
-
 #### Column class
 
 Column can has it's own HTML class
@@ -150,9 +150,17 @@ $table->addColumn('ColName')->setClass('red');
 ```
 
 #### Additional
-Or if is need to customize URL, use method ```setNavigationNames``` like below:
+If we want to sort and filter data by framework (e.g. QueryBuilder) and pass to table only filtered result set, call
 ```php
-$table->->setNavigationNames([
+$table = Table::create($rows)->setTotalItemCount(count($rows));
+```
+and table skip sorting, filtering and paging.
+By this integer value is also counted number of pages in listing, so insert the right number.
+
+
+If is need to customize URL, use method ```setNavigationNames``` like below:
+```php
+$table->setNavigationNames([
     'limit' => 'cust_limit',
     'orderBy' => 'cust_order_by',
     'order' => 'cust_order',
@@ -162,4 +170,4 @@ $table->->setNavigationNames([
 ])
 ```
 will cause the URL will look after some table click action like 
-```http:/my_server/?custom_sort_by=Name&custom_sort=ASC&custom_limit=5&custom_page=1&custom_pattern=```
+```http:/my_Server/?cust_order_by=Name&cust_order=ASC&cust_limit=5&cust_page=1&cust_pattern=```

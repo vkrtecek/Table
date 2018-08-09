@@ -96,7 +96,14 @@ class Html
             $sortingFunction = $this->sortingCol->getOrderableFunction() ?: function ($a, $b) {
                 return ($this->sortingCol->getContent($a) > $this->sortingCol->getContent($b) ? 1 : -1) * ($this->getOrder() == self::DEFAULT_ORDER ? -1 : 1);
             };
-            usort($result, $sortingFunction);
+            usort($result, function ($a, $b) {
+              return
+                  call_user_func($this->sortingCol->getOrderableFunction()
+                      ?: function ($a, $b) {
+                      return ($this->sortingCol->getContent($a) > $this->sortingCol->getContent($b) ? 1 : -1);
+                    }, $a, $b)
+                  * ($this->getOrder() == self::DEFAULT_ORDER ? -1 : 1);
+            });
         }
         return $result;
     }

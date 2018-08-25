@@ -21,6 +21,8 @@ class TestObject
     private $age;
     /** @var string */
     private $language;
+    /** @var \DateTime */
+    private $birthdate;
 
     /**
      * @param int $id
@@ -28,10 +30,13 @@ class TestObject
      * @param string $surname
      * @param int $age
      * @param string $language
+     * @param \DateTime $birthdate
      * @return TestObject
      */
-    public static function create(int $id, string $name, string $surname, int $age, string $language): self {
-        return (new self)->setId($id)->setName($name)->setSurname($surname)->setAge($age)->setLanguage($language);
+    public static function create(int $id, string $name, string $surname, int $age, string $language, \Datetime $birthdate = NULL): self {
+        $obj = (new self)->setId($id)->setName($name)->setSurname($surname)->setAge($age)->setLanguage($language);
+        if ($birthdate) $obj->setBirthdate($birthdate);
+        return $obj;
     }
 
     /**
@@ -121,6 +126,24 @@ class TestObject
     public function setLanguage(string $language): TestObject
     {
         $this->language = $language;
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getBirthdate(): \DateTime
+    {
+        return $this->birthdate;
+    }
+
+    /**
+     * @param \DateTime $birthdate
+     * @return TestObject
+     */
+    public function setBirthdate(\DateTime $birthdate): TestObject
+    {
+        $this->birthdate = $birthdate;
         return $this;
     }
 

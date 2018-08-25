@@ -31,7 +31,7 @@ div#users-table div#table-navigation-forms input:focus {
 
 /* TABLE */
 div#users-table {
-    font-family: Raleway,sans-serif;
+    font-family: Raleway, sans-serif;
 }
 div#users-table form.action-form {
     display: inline;
@@ -42,12 +42,43 @@ div#users-table .red {
 div#users-table .green {
     color: green;
 }
-
-
 div#users-table {
     margin: auto;
     text-align: center;
     display: inline-block;
+}
+
+
+
+/* THEAD */
+div#users-table thead tr:nth-child(2) th {
+    font-size: 50%;
+    border-bottom: solid black 2px;
+    border-top: solid black 2px;
+    padding: 0;
+    margin: 0;
+}
+div#users-table thead tr:nth-child(2) input {
+    height: 15px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+div#users-table thead tr:nth-child(2) th {
+}
+div#users-table thead tr:nth-child(2) input[type="text"] {
+    width: 100%;
+    height: 100%;
+    padding:0;
+    margin:0;
+}
+div#users-table button#show_navigation, div#users-table button#hide_navigation {
+    background-color: #2a88bd;
+    color: #fff;
+    padding: 10px;
+    border: transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: Raleway, sans-serif;
 }
 
 

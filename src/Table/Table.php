@@ -33,29 +33,32 @@ class Table
      * Table constructor.
      * Instance class by static method create
      * @param array $data
+     * @param int $showingRows
      */
-    private function __construct(array $data)
+    private function __construct(array $data, int $showingRows)
     {
         $this->insertData($data);
-        $this->htmlTable = new Html($this);
+        $this->htmlTable = new Html($this, $showingRows);
     }
 
     /**
      * @param array|NULL $data
+     * @param int $showingRows
      * @return Table
      */
-    public static function create(array $data = []): Table {
-        return new self($data ? $data : []);
+    public static function create(array $data = [], int $showingRows = 15): Table {
+        return new self($data, $showingRows);
     }
 
     /**
      * @param string $col
+     * @param string|NULL $alias
      * @return Column
      */
-    public function addColumn($col): Column
+    public function addColumn(string $col, string $alias = NULL): Column
     {
-        $column = (new Column($this, $col));
-        $this->cols[$col] = $column;
+        $column = (new Column($this, $col, $alias));
+        $this->cols[$alias ?: $col] = $column;
         return $column;
     }
 
@@ -105,8 +108,26 @@ class Table
 
         //add HEAD
         $table->thead()->addRowName('_head');
-        foreach ($this->cols as $col)
-            $table->thead()->th('_head', $col->getName(), $this->htmlTable->printHeadForCol($col));
+        $someColumnSearch = FALSE;
+        foreach ($this->cols as $col) {
+            $table->thead()->th('_head', $col->getName(), $this->htmlTable->printHeadForCol($col, $this->cols));
+            if ($col->isSoloSearchable() || $col->isDateFromToSearchable())
+                $someColumnSearch = TRUE;
+        }
+        //if some column is solo or dateFromTo searchable add thead row
+        if ($someColumnSearch) {
+            $table->thead()->addRow('_head_searching');
+            $table->thead()->addRowClass('_head_searching', '_navigation_row');
+            foreach ($this->cols as $col) {
+                if ($col->isSoloSearchable()) {
+                    $table->thead()->th('_head_searching', $col->getName(), $this->htmlTable->generateSoloSearchCell($col, $this->cols));
+                } else if ($col->isDateFromToSearchable()) {
+                    $table->thead()->th('_head_searching', $col->getName(), $this->htmlTable->generateDateFromToSearchCell($col, $this->cols));
+                } else {
+                    $table->thead()->th('_head_searching', $col->getName(), '');
+                }
+            }
+        }
 
         $table->tbody();
 
@@ -137,27 +158,11 @@ class Table
 
         return '<div id="users-table">' .
                 (isset($config['css']) && $config['css'] ? '<style type="text/css">' . $this->renderCSS() . '</style>' : '') .
-                $this->printNavigation() .
+                $this->printNavigation($someColumnSearch) .
                 $table->render() .
                 $this->printListing() .
+                $this->htmlTable->printScripts() .
             '</div>';
-    }
-
-
-
-    /**
-     * @return string
-     */
-    private function printNavigation(): string {
-        return $this->htmlTable->getNavigation($this->cols);
-    }
-
-    /**
-     * @return string
-     */
-    private function printListing(): string {
-        $rows = $this->htmlTable->filterRows($this->rows, $this->cols);
-        return $this->htmlTable->getListing($rows, $this->itemsCount);
     }
 
     /**
@@ -216,5 +221,26 @@ class Table
     public function setTotalItemCount(int $number): Table {
         $this->itemsCount = $number;
 	    return $this;
+    }
+
+
+
+    /**
+     * @param bool $someColumnSearch prints button for jQuery hide/show <tr> with navigation
+     * @return string
+     */
+    private function printNavigation(bool $someColumnSearch = FALSE): string {
+        return $this->htmlTable->getNavigation($this->cols, $someColumnSearch);
+    }
+
+    /**
+     * @return string
+     */
+    private function printListing(): string {
+        //filter rows only if is necessary and count from it number of pages
+        $rows = $this->itemsCount === null
+            ? $this->htmlTable->filterRows($this->rows, $this->cols)
+            : $this->rows;
+        return $this->htmlTable->getListing($this->cols, $rows, $this->itemsCount);
     }
 }

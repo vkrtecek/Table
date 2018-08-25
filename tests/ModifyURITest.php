@@ -16,9 +16,9 @@ class ModifyURITest extends CreateTableTest
     public function testModifyURI() {
         $this->prepareData();
         $table = Table::create($this->data)
-            ->addColumn('ID')->setProperty('id')
-            ->addColumn('Name')->setProperty('name')
-            ->addColumn('Age')->setProperty('age')
+            ->addColumn('ID')->setContent('id')
+            ->addColumn('Name')->setContent('name')
+            ->addColumn('Age')->setContent('age')
         ->setNavigationNames([
             'limit' => 'počet_prvků',
             'orderBy' => 'řadit_podle',
@@ -40,7 +40,7 @@ class ModifyURITest extends CreateTableTest
             '      <input type="hidden" name="q" value="false" />' . self::PHP_EOL .
             '      <button hidden="hidden"></button>' . self::PHP_EOL .
             '    </form>' . self::PHP_EOL .
-            '  </div>' . self::PHP_EOL .
+            '  </div>' . self::PHP_EOL . self::PHP_EOL .
             '<table>' . self::PHP_EOL .
             '  <thead>' . self::PHP_EOL .
             '    <tr><th class="">ID</th><th class="">Name</th><th class="">Age</th></tr>' . self::PHP_EOL .
@@ -51,7 +51,10 @@ class ModifyURITest extends CreateTableTest
             '    <tr class="odd"><td class="">3</td><td class="">Paul</td><td class="">13</td></tr>' . self::PHP_EOL .
             '  </tbody>' . self::PHP_EOL .
             '</table>' . self::PHP_EOL .
-            '<div id="listing"></div></div>';
+            '<div id="listing">' . self::PHP_EOL .
+            '</div>' . self::PHP_EOL .
+            $this->scripts() .
+            '</div>';
 
         $this->assertEquals($expected, $table->renderHTML());
     }

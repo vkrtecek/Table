@@ -17,8 +17,8 @@ class AddSortingAndFilteringTest extends CreateTableTest
     {
         $this->prepareData();
         $table = Table::create($this->data)
-            ->addColumn('ID')->setProperty('id')
-            ->addColumn('Name')->setSearchable()->setProperty('name')
+            ->addColumn('ID')->setContent('id')
+            ->addColumn('Name')->setSearchable()->setContent('name')
             ->setNavigationNames([
                 'limit' => 'počet_prvků',
                 'orderBy' => 'řadit_podle',
@@ -40,7 +40,7 @@ class AddSortingAndFilteringTest extends CreateTableTest
             '      <input type="hidden" name="q" value="false" />' . self::PHP_EOL .
             '      <button hidden="hidden"></button>' . self::PHP_EOL .
             '    </form>' . self::PHP_EOL .
-            '  </div>' . self::PHP_EOL .
+            '  </div>' . self::PHP_EOL . self::PHP_EOL .
             '<table>' . self::PHP_EOL .
             '  <thead>' . self::PHP_EOL .
             '    <tr><th class="">ID</th><th class="">Name</th></tr>' . self::PHP_EOL .
@@ -51,7 +51,10 @@ class AddSortingAndFilteringTest extends CreateTableTest
             '    <tr class="odd"><td class="">3</td><td class="">Paul</td></tr>' . self::PHP_EOL .
             '  </tbody>' . self::PHP_EOL .
             '</table>' . self::PHP_EOL .
-            '<div id="listing"></div></div>';
+            '<div id="listing">' . self::PHP_EOL .
+            '</div>' . self::PHP_EOL .
+            $this->scripts() .
+            '</div>';
 
         $this->assertEquals($expected, $table->renderHTML());
 
@@ -59,7 +62,7 @@ class AddSortingAndFilteringTest extends CreateTableTest
 
 
         //add another searchable column
-        $table->addColumn('Age')->setSearchable()->setProperty('age');
+        $table->addColumn('Age')->setSearchable()->setContent('age');
 
         $expected =
             '<div id="users-table">' . self::PHP_EOL .
@@ -73,7 +76,7 @@ class AddSortingAndFilteringTest extends CreateTableTest
             '      <input type="hidden" name="q" value="false" />' . self::PHP_EOL .
             '      <button hidden="hidden"></button>' . self::PHP_EOL .
             '    </form>' . self::PHP_EOL .
-            '  </div>' . self::PHP_EOL .
+            '  </div>' . self::PHP_EOL . self::PHP_EOL .
             '<table>' . self::PHP_EOL .
             '  <thead>' . self::PHP_EOL .
             '    <tr><th class="">ID</th><th class="">Name</th><th class="">Age</th></tr>' . self::PHP_EOL .
@@ -84,7 +87,10 @@ class AddSortingAndFilteringTest extends CreateTableTest
             '    <tr class="odd"><td class="">3</td><td class="">Paul</td><td class="">13</td></tr>' . self::PHP_EOL .
             '  </tbody>' . self::PHP_EOL .
             '</table>' . self::PHP_EOL .
-            '<div id="listing"></div></div>';
+            '<div id="listing">' . self::PHP_EOL .
+            '</div>' . self::PHP_EOL .
+            $this->scripts() .
+            '</div>';
 
         $this->assertEquals($expected, $table->renderHTML());
     }

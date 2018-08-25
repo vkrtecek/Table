@@ -26,8 +26,9 @@ class TestObject
     private $id;
     private $name;
     private $age;
+    private $birthdate;
     
-    public function __construct($id, $name, $age) {
+    public function __construct($id, $name, $age, $birthdate = NULL) {
         $this->id = $id;
         $this->name = $name;
         $this->age = $age;
@@ -36,6 +37,7 @@ class TestObject
     public function getId() { return $this->id; }
     public function getName() { return $this->name; }
     public function getAge() { return $this->age; }
+    public function getBirthDate() { return $this->birthdate; }
 }
 ```
 
@@ -50,17 +52,17 @@ $data = [
     new TestObject(3, 'Paul', 13),
     new TestObject(4, 'Joe', 25),
     new TestObject(5, 'Lucia', 80),
-    new TestObject(6, 'Štěpán', 29),
+    new TestObject(6, 'Štěpán', 29, '1989-03-23'),
 ];
 
 $table = \Vkrtecek\Table\Table::create($data)
-   ->addColumn('ID of person')->setProperty('id')
-   ->addColumn('Name')->setProperty('name')
-   ->addColumn('Age')->setProperty('age');
+   ->addColumn('ID of person')->setContent('id')
+   ->addColumn('Name')->setContent('name')
+   ->addColumn('Age')->setContent('age');
                 
 ```
 
-The string passed by ``` setProperty() ``` must be the same string as signature of property's getter without ```get```. So for example if the TestObject has method ```getAge()```, ```setProperty()``` must pass string ```'age'``` or ```'Age'```.
+The string passed by ``` setContent() ``` must be the same string as signature of property's getter without ```get```. So for example if the TestObject has method ```getAge()```, ```setContent()``` must pass string ```'age'``` or ```'Age'```.
 
 And in your View call:
 
@@ -120,20 +122,18 @@ $table->addColumn('Name')->setContent(function (TestObject $obj) {
   </tbody>
 </table>
 
-But one of the ```setProperty()``` and ```setContent()``` must be specified. 
-
 #### Sorting and filtering table data
 
 Sometimes we need sort data by some attribute:
 ```php
-$table->addColumn('Name')->setOrderable()->setProperty('name');
+$table->addColumn('Name')->setOrderable()->setContent('name');
 ```
 and now by clicking on the table column header, we can sort the rows by this column.
 Or ```setOrderable()``` pass one parameter of type callable to specify the style of sorting.
 
 By typing code below the field for filtering of specific column data will appear:
 ```php
-$table->addColumn('Name')->setSearchable()->setProperty('name');
+$table->addColumn('Name')->setSearchable()->setContent('name');
 ```
 
 If we don't want to show all rows and enable paging, which will render input for number of rows:
@@ -170,4 +170,21 @@ $table->setNavigationNames([
 ])
 ```
 will cause the URL will look after some table click action like 
-```http:/my_Server/?cust_order_by=Name&cust_order=ASC&cust_limit=5&cust_page=1&cust_pattern=```
+```http://my_Server/?cust_order_by=Name&cust_order=ASC&cust_limit=5&cust_page=1&cust_pattern=```
+
+#### Column filtering
+Also for filtering by one single column, there is method ```setSoloSearchable()``` which pass string - URL attribute:
+```php
+$table->addColumn('Name')->setSoloSearchable('url_name')->setContent('name');
+```
+will after any table action show URL like
+```http://my_Server/?...url_name=<value>```
+and similar for date column
+```php
+$table->addColumn('Name')->setDateFromToSearchable('url_from', 'url_to')->setContent('birthade');
+```
+the URL will look like
+```http://my_Server/?...url_from=<val_from>&url_to=<val_to>```
+for filtering column by "between dates".
+
+If one of these filters are set, the button for show/hide the navigation row will appear above the table. If the "SHOW" button is clicked, navigation row will appear as the second THEAD row.

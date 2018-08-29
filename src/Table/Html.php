@@ -14,6 +14,7 @@ class Html
     /** @var Column */
     private $sortingCol;
     const PHP_EOL = "\n";
+    const UNHIDDEN_LISTING_NAVIGATION_PAGES = 7;
 
 	private $table;
 	private $limit = 'limit';
@@ -22,14 +23,18 @@ class Html
 	private $order = 'sort';
 	private $pattern = 'pattern';
 	private $url;
+	/** @var int default number of rows */
 	private $defaultLimit;
+
+    /** @var int|null total items in table */
+    private $itemsCnt = NULL;
 
     const ORDER_ASC = 'ASC';
     const ORDER_DESC = 'DESC';
 
 	const DEFAULT_PAGE = 1;
-	const DEFAULT_ORDER_BY = '';
-	const DEFAULT_ORDER = self::ORDER_ASC;
+	private $defaultOrderBy = '';
+	private $defaultOrder = self::ORDER_ASC;
 	const DEFAULT_PATTERN = '';
 
     /**
@@ -115,6 +120,7 @@ class Html
      */
     public function filterRows(array $rows, array $cols): array
     {
+        $this->setItemsCnt(count($rows));
         $result = [];
         //filter by pattern
         if (isset($_GET[$this->pattern]) && $_GET[$this->pattern] != '') {
@@ -169,7 +175,7 @@ class Html
                       ?: function ($a, $b) {
                       return ($this->sortingCol->getContent($a) > $this->sortingCol->getContent($b) ? 1 : -1);
                     }, $a, $b)
-                  * ($this->getOrder() == self::DEFAULT_ORDER ? -1 : 1);
+                  * ($this->getOrder() == $this->defaultOrder ? -1 : 1);
             });
         }
         return $result;
@@ -208,7 +214,29 @@ class Html
 	    $ret = '<div id="listing">' . self::PHP_EOL;
 	    $listing = '';
         $itemsCnt = $itemsCnt ? $itemsCnt : count($rows);
-	    for ($i = 1; $i <= ceil($itemsCnt / $this->getLimit()); $i++) {
+
+        $lastPage = ceil($itemsCnt / $this->getLimit());
+        $from = (int)$this->getPage() - ceil(self::UNHIDDEN_LISTING_NAVIGATION_PAGES / 2);
+        $to = (int)$this->getPage() + ceil(self::UNHIDDEN_LISTING_NAVIGATION_PAGES / 2);
+
+        $from_page = max(1, $from);
+        $to_page = min($lastPage, $to);
+
+        //first page always
+        if ($from_page != 1) {
+            $listing .= '<a href="' . $this->url .
+                '?' . $this->orderBy . '=' . $this->getOrderBy() .
+                '&' . $this->order . '=' . $this->getOrder() .
+                '&' . $this->limit . '=' . $this->getLimit() .
+                '&' . $this->page . '=' . 1 .
+                '&' . $this->pattern . '=' . $this->getPattern() .
+                $this->getAHREFForAdditionalAttributes($cols) .
+                '&q=false' . '">' .
+                '    <span class="listing-page">' . 1 . '</span>' .
+                '</a> . . . ' . self::PHP_EOL;
+        }
+
+	    for ($i = $from_page; $i <= $to_page; $i++) {
 	        if ($i == $this->getPage())
 	            $listing .=  '<span class="listing-page" id="listing-selected">' . $i . '</span>' . self::PHP_EOL;
 	        else
@@ -223,8 +251,35 @@ class Html
                     '    <span class="listing-page">' . $i . '</span>' .
 				    '</a>' . self::PHP_EOL;
         }
+
+        //last page always
+        if ($to_page != $lastPage) {
+            $listing .= ' . . . <a href="' . $this->url .
+                '?' . $this->orderBy . '=' . $this->getOrderBy() .
+                '&' . $this->order . '=' . $this->getOrder() .
+                '&' . $this->limit . '=' . $this->getLimit() .
+                '&' . $this->page . '=' . $lastPage .
+                '&' . $this->pattern . '=' . $this->getPattern() .
+                $this->getAHREFForAdditionalAttributes($cols) .
+                '&q=false' . '">' .
+                '    <span class="listing-page">' . $lastPage . '</span>' .
+                '</a>' . self::PHP_EOL;
+        }
 	    return $ret . ($i == 2 ? '' : $listing) . '</div>' . self::PHP_EOL;
 	}
+
+    /**
+     * @param int $totalItems
+     * @return string
+     */
+	public function getStatusBar(int $totalItems): string {
+	    $firstItem = $this->getLimit() * ($this->getPage() - 1) + 1;
+	    $lastItem = min($this->getLimit() * $this->getPage(), $totalItems);
+	    return
+            '<div id="statusBar">' . self::PHP_EOL .
+                $firstItem . ' - ' . $lastItem . ' of ' . $totalItems . self::PHP_EOL .
+            '</div>' . self::PHP_EOL;
+    }
 
     /**
      * @param Column $col
@@ -325,14 +380,18 @@ class Html
 	 * @return string
 	 */
 	public function getPage(): string {
-		return $_GET[$this->page] ?? self::DEFAULT_PAGE;
+	    $page = $_GET[$this->page] ?? self::DEFAULT_PAGE;
+		if ($this->itemsCnt === NULL)
+		    return $page;
+		else //if user is on nth page and filter, so no item will be on current nth page ---> set page to first
+		    return (($page-1) * $this->getLimit() + 1 >= $this->itemsCnt) ? 1 : $page;
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getOrderBy(): string {
-        return $_GET[$this->orderBy] ?? self::DEFAULT_ORDER_BY;
+        return $_GET[$this->orderBy] ?? $this->defaultOrderBy;
 	}
 
 	/**
@@ -342,8 +401,8 @@ class Html
 		return isset($_GET[$this->order])
             ? isset($_GET[$this->orderBy]) && $_GET[$this->orderBy] != ''
                 ? $this->switchOrder()
-                : self::DEFAULT_ORDER
-			: self::DEFAULT_ORDER;
+                : $this->defaultOrder
+			: $this->defaultOrder;
 	}
 
 	/**
@@ -356,44 +415,47 @@ class Html
     /**
      * generate two inputs for searching between two dates
      * @param Column $col
-     * @param Column[] $columns
      * @return string
      */
-    public function generateDateFromToSearchCell(Column $col, array $columns): string {
-        $form = '<form method="GET" action="' . $this->url . '">' . self::PHP_EOL .
-            '      <input type="hidden" name="' . $this->orderBy . '" value="' . $this->getOrderBy() . '" />' . self::PHP_EOL .
-            '      <input type="hidden" name="' . $this->order . '" value="' . $this->getOrder() . '" />' . self::PHP_EOL .
-            '      <input type="hidden" name="' . $this->limit . '" value="' . $this->getLimit() . '" />' . self::PHP_EOL .
-            '      <input type="hidden" name="' . $this->page . '" value="' . $this->getPage() . '" />' . self::PHP_EOL .
-            '      <input type="hidden" name="' . $this->pattern . '" value="' . $this->getPattern() . '" />' . self::PHP_EOL .
+    public function generateDateFromToSearchCell(Column $col): string {
+        return
             '      <label for="date_from">From: </label>' . self::PHP_EOL .
             '      <input type="datetime-local" name="' . $col->getDateFromToSearchable()['from'] . '" value="' . $col->getDateFromToSearchableVal('from') . '" id="date_from" />' . self::PHP_EOL .
-            $this->getInputsForAdditionalAttributes($columns, $col) .
             '      <br />' . self::PHP_EOL .
             '      <label for="date_to">To: </label>' . self::PHP_EOL .
-            '      <input type="datetime-local" name="' . $col->getDateFromToSearchable()['to'] . '" value="' . $col->getDateFromToSearchableVal('to') . '" id="date_to" />' . self::PHP_EOL .
-            '      <button hidden="hidden"></button>' . self::PHP_EOL .
-        '</form>' . self::PHP_EOL;
-        return $form;
+            '      <input type="datetime-local" name="' . $col->getDateFromToSearchable()['to'] . '" value="' . $col->getDateFromToSearchableVal('to') . '" id="date_to" />' . self::PHP_EOL;
     }
 
     /**
      * generates input for searching above one column by pattern
      * @param Column $col
-     * @param Column[] $columns
      * @return string
      */
-    public function generateSoloSearchCell(Column $col, array $columns): string {
-        $form = '<form method="GET" action="' . $this->url . '">' . self::PHP_EOL .
+    public function generateSoloSearchCell(Column $col): string {
+        return '      <input type="text" name="' . $col->getSoloSearchable() . '" value="' . $col->getSoloSearchableVal() . '" placeholder="pattern" />' . self::PHP_EOL;
+    }
+
+    /**
+     * generate start of searching form
+     * @return string
+     */
+    public function getStartOfPostForm(): string {
+        return '<form method="GET" action="' . $this->url . '">' . self::PHP_EOL .
             '      <input type="hidden" name="' . $this->orderBy . '" value="' . $this->getOrderBy() . '" />' . self::PHP_EOL .
             '      <input type="hidden" name="' . $this->order . '" value="' . $this->getOrder() . '" />' . self::PHP_EOL .
             '      <input type="hidden" name="' . $this->limit . '" value="' . $this->getLimit() . '" />' . self::PHP_EOL .
             '      <input type="hidden" name="' . $this->page . '" value="' . $this->getPage() . '" />' . self::PHP_EOL .
-            '      <input type="hidden" name="' . $this->pattern . '" value="' . $this->getPattern() . '" />' . self::PHP_EOL .
-            '      <input type="text" name="' . $col->getSoloSearchable() . '" value="' . $col->getSoloSearchableVal() . '" placeholder="pattern" />' . self::PHP_EOL .
-            $this->getInputsForAdditionalAttributes($columns, $col) .
-            '</form>' .  self::PHP_EOL;
-        return $form;
+            '      <input type="hidden" name="' . $this->pattern . '" value="' . $this->getPattern() . '" />' . self::PHP_EOL;
+    }
+
+    /**
+     * generate ond of searching form
+     * @return string
+     */
+    public function getEndOfPostForm(): string {
+        return
+            '      <button hidden="hidden"></button>' . self::PHP_EOL .
+            '</form>' . self::PHP_EOL;
     }
 
     /**
@@ -405,6 +467,32 @@ class Html
         return $this;
     }
 
+    /**
+     * @param int $cnt
+     * @return Html
+     */
+    public function setItemsCnt(int $cnt): Html {
+        $this->itemsCnt = $cnt;
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     * @return Html
+     */
+    public function setDefaultOrder(string $value): Html {
+        $this->defaultOrder = $value;
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     * @return Html
+     */
+    public function setDefaultOrderBy(string $value): Html {
+        $this->defaultOrderBy = $value;
+        return $this;
+    }
 
     /**
      * switch from DESC to ASC and back

@@ -22,6 +22,8 @@ class Table
     private $listing = false;
     /** @var int */
     private $itemsCount = null;
+    /** @var bool */
+    private $statusBar;
 
     /**
      * Rows of table
@@ -33,21 +35,24 @@ class Table
      * Table constructor.
      * Instance class by static method create
      * @param array $data
-     * @param int $showingRows
+     * @param int $showingRows default value for how many rows will be rendered
+     * @param bool $showStatusBar adds <div> with information about number of listed items like 1 - 15 of 24
      */
-    private function __construct(array $data, int $showingRows)
+    private function __construct(array $data, int $showingRows, $showStatusBar = TRUE)
     {
         $this->insertData($data);
         $this->htmlTable = new Html($this, $showingRows);
+        $this->statusBar = $showStatusBar;
     }
 
     /**
      * @param array|NULL $data
-     * @param int $showingRows
+     * @param int $showingRows default value for how many rows will be rendered
+     * @param bool $showStatusBar (1 - 20 of 243)
      * @return Table
      */
-    public static function create(array $data = [], int $showingRows = 15): Table {
-        return new self($data, $showingRows);
+    public static function create(array $data = [], int $showingRows = 15, $showStatusBar = FALSE): Table {
+        return new self($data, $showingRows, $showStatusBar);
     }
 
     /**
@@ -88,6 +93,7 @@ class Table
     }
 
     /**
+     * render input to specify how many rows will appear
      * @return Table
      */
     public function enableListing(): Table {
@@ -97,13 +103,18 @@ class Table
 
     /**
      * @param array $config = array(
-     *      'css' => [bool]
+     *      'css' => [bool],
+     *      'defaultOrder' => [string],
+     *      'defaultOrderBy' => [string],
      * );
      * @return string HTML output
      * @throws \Exception
      */
     public function renderHTML(array $config = []): string
     {
+        if (isset($config['defaultOrder'])) $this->htmlTable->setDefaultOrder($config['defaultOrder']);
+        if (isset($config['defaultOrderBy'])) $this->htmlTable->setDefaultOrderBy($config['defaultOrderBy']);
+
         $table = \Donquixote\Cellbrush\Table\Table::create();
 
         //add HEAD
@@ -111,8 +122,9 @@ class Table
         $someColumnSearch = FALSE;
         foreach ($this->cols as $col) {
             $table->thead()->th('_head', $col->getName(), $this->htmlTable->printHeadForCol($col, $this->cols));
-            if ($col->isSoloSearchable() || $col->isDateFromToSearchable())
+            if ($col->isSoloSearchable() || $col->isDateFromToSearchable()) {
                 $someColumnSearch = TRUE;
+            }
         }
         //if some column is solo or dateFromTo searchable add thead row
         if ($someColumnSearch) {
@@ -120,9 +132,9 @@ class Table
             $table->thead()->addRowClass('_head_searching', '_navigation_row');
             foreach ($this->cols as $col) {
                 if ($col->isSoloSearchable()) {
-                    $table->thead()->th('_head_searching', $col->getName(), $this->htmlTable->generateSoloSearchCell($col, $this->cols));
+                    $table->thead()->th('_head_searching', $col->getName(), $this->htmlTable->generateSoloSearchCell($col));
                 } else if ($col->isDateFromToSearchable()) {
-                    $table->thead()->th('_head_searching', $col->getName(), $this->htmlTable->generateDateFromToSearchCell($col, $this->cols));
+                    $table->thead()->th('_head_searching', $col->getName(), $this->htmlTable->generateDateFromToSearchCell($col));
                 } else {
                     $table->thead()->th('_head_searching', $col->getName(), '');
                 }
@@ -159,7 +171,9 @@ class Table
         return '<div id="users-table">' .
                 (isset($config['css']) && $config['css'] ? '<style type="text/css">' . $this->renderCSS() . '</style>' : '') .
                 $this->printNavigation($someColumnSearch) .
+                $this->htmlTable->getStartOfPostForm() .
                 $table->render() .
+                $this->htmlTable->getEndOfPostForm() .
                 $this->printListing() .
                 $this->htmlTable->printScripts() .
             '</div>';
@@ -241,6 +255,7 @@ class Table
         $rows = $this->itemsCount === null
             ? $this->htmlTable->filterRows($this->rows, $this->cols)
             : $this->rows;
-        return $this->htmlTable->getListing($this->cols, $rows, $this->itemsCount);
+        $this->htmlTable->setItemsCnt(count($rows));
+        return ($this->statusBar ? $this->htmlTable->getStatusBar(count($rows)) : '') . $this->htmlTable->getListing($this->cols, $rows, $this->itemsCount);
     }
 }

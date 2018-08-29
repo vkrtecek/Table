@@ -68,13 +68,13 @@ And in your View call:
 
 ```php
 <style>
-    $table->renderCSS();
+    <?= $table->renderCSS(); ?>
 </style>
 .
 .
 .
 <body>
-    $table->renderHTML();
+    <?= $table->renderHTML(); ?>
 </body>
 ```
 

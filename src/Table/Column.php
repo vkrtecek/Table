@@ -29,10 +29,14 @@ class Column
 	private $orderable = false;
 	/** @var callable */
 	private $orderFunction = null;
-	/** @var string */
-	private $soloSearchable = null;
+    /** @var string */
+    private $soloSearchable = null;
+    /** @var string */
+    private $soloSearchableDefault = null;
 	/** @var array */
 	private $dateFromToSearchable = null;
+	/** @var string[] */
+	private $dateFromToSearchableDefault = null;
 
     /**
      * Column constructor.
@@ -148,6 +152,10 @@ class Column
 	    return $this->orderFunction;
     }
 
+
+
+
+
     /**
      * @return bool
      */
@@ -155,10 +163,23 @@ class Column
         return $this->dateFromToSearchable !== NULL;
     }
     /**
+     * @return bool
+     */
+    public function hasDateFromToSearchableDefault(): bool {
+        return $this->dateFromToSearchableDefault !== NULL;
+    }
+    /**
      * @return array|NULL
      */
     public function getDateFromToSearchable(): array {
         return $this->dateFromToSearchable;
+    }
+    /**
+     * @param string $type
+     * @return string|NULL
+     */
+    public function getDateFromToSearchableDefault(string $type) {
+        return $this->dateFromToSearchableDefault[$type] ?? NULL;
     }
     /**
      * @param string $type from or to
@@ -170,12 +191,17 @@ class Column
     /**
      * @param string $urlAttrFrom
      * @param string $urlAttrTo
+     * @param string|NULL $defaultFrom
+     * @param string|NULL $defaultTo
      * @return Column
      */
-    public function setDateFromToSearchable(string $urlAttrFrom, string $urlAttrTo): Column {
+    public function setDateFromToSearchable(string $urlAttrFrom, string $urlAttrTo, $defaultFrom = NULL, $defaultTo = NULL): Column {
         $this->dateFromToSearchable = ['from' => $urlAttrFrom, 'to' => $urlAttrTo, ];
+        $this->dateFromToSearchableDefault = ['from' => $defaultFrom, 'to' => $defaultTo];
         return $this;
     }
+
+
 
 
     /**
@@ -185,10 +211,22 @@ class Column
         return $this->soloSearchable !== NULL;
     }
     /**
+     * @return bool
+     */
+    public function hasSoloSearchableDefault(): bool {
+        return $this->soloSearchableDefault !== NULL;
+    }
+    /**
      * @return string|NULL
      */
     public function getSoloSearchable(): string {
         return $this->soloSearchable;
+    }
+    /**
+     * @return string|NULL
+     */
+    public function getSoloSearchableDefault(): string {
+        return $this->soloSearchableDefault;
     }
     /**
      * @return string
@@ -198,10 +236,12 @@ class Column
     }
     /**
      * @param string $urlAttr
+     * @param string $default
      * @return Column
      */
-    public function setSoloSearchable(string $urlAttr): Column {
+    public function setSoloSearchable(string $urlAttr, $default = NULL): Column {
         $this->soloSearchable = $urlAttr;
+        $this->soloSearchableDefault = $default;
         return $this;
     }
 

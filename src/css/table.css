@@ -84,6 +84,13 @@ div#users-table button#show_navigation, div#users-table button#hide_navigation {
 
 
 
+/* STATUS BAR */
+div#users-table div#statusBar {
+    display: inline-block;
+    float: left;
+}
+
+
 
 /* LISTING */
 div#users-table table {

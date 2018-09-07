@@ -23,7 +23,7 @@ class Table
     /** @var int */
     private $itemsCount = null;
     /** @var bool */
-    private $statusBar;
+    private $statusBarItems = NULL;
 
     /**
      * Rows of table
@@ -36,23 +36,23 @@ class Table
      * Instance class by static method create
      * @param array $data
      * @param int $showingRows default value for how many rows will be rendered
-     * @param bool $showStatusBar adds <div> with information about number of listed items like 1 - 15 of 24
+     * @param int $showStatusBar adds <div> with information about number of listed items like 1 - 15 of 24
      */
-    private function __construct(array $data, int $showingRows, $showStatusBar = TRUE)
+    private function __construct(array $data, int $showingRows, $showStatusBar = NULL)
     {
         $this->insertData($data);
         $this->htmlTable = new Html($this, $showingRows);
-        $this->statusBar = $showStatusBar;
+        $this->statusBarItems = $showStatusBar;
     }
 
     /**
      * @param array|NULL $data
      * @param int $showingRows default value for how many rows will be rendered
-     * @param bool $showStatusBar (1 - 20 of 243)
+     * @param int $showStatusBarItemsCnt (1 - 20 of 243)
      * @return Table
      */
-    public static function create(array $data = [], int $showingRows = 15, $showStatusBar = FALSE): Table {
-        return new self($data, $showingRows, $showStatusBar);
+    public static function create(array $data = [], int $showingRows = 15, $showStatusBarItemsCnt = NULL): Table {
+        return new self($data, $showingRows, $showStatusBarItemsCnt);
     }
 
     /**
@@ -255,7 +255,7 @@ class Table
         $rows = $this->itemsCount === null
             ? $this->htmlTable->filterRows($this->rows, $this->cols)
             : $this->rows;
-        $this->htmlTable->setItemsCnt(count($rows));
-        return ($this->statusBar ? $this->htmlTable->getStatusBar(count($rows)) : '') . $this->htmlTable->getListing($this->cols, $rows, $this->itemsCount);
+        $this->htmlTable->setItemsCnt($this->itemsCount ?? count($rows));
+        return ($this->statusBarItems > 0 ? $this->htmlTable->getStatusBar($this->statusBarItems) : '') . $this->htmlTable->getListing($this->cols, $rows, $this->itemsCount);
     }
 }

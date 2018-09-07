@@ -35,6 +35,8 @@ class Html
 	const DEFAULT_PAGE = 1;
 	private $defaultOrderBy = '';
 	private $defaultOrder = self::ORDER_ASC;
+	/** @var string $workingOrder DESC|ASC */
+	private $workingOrder;
 	const DEFAULT_PATTERN = '';
 
     /**
@@ -78,6 +80,7 @@ class Html
             '      <input type="' . $limitInputType . '" step="1" name="' . $this->limit . '" id="limit" value="' . $this->getLimit() . '">' . self::PHP_EOL .
             '      <input type="hidden" name="' . $this->page . '" value="' . $this->getPage() . '" />' . self::PHP_EOL .
             '      <input type="' . $patternInputType . '" name="' . $this->pattern . '" value="' . $this->getPattern() . '" id="pattern" placeholder="' . $placeholder . '" />' . self::PHP_EOL .
+            '       <input type="hidden" name="pre_order_by" value="' . ($_GET[$this->orderBy] ?? $this->defaultOrderBy) . '" />' . self::PHP_EOL .
             '      <input type="hidden" name="q" value="false" />' . self::PHP_EOL .
             '      <button hidden="hidden"></button>' . self::PHP_EOL .
             $inputsForAdditionalAttributes .
@@ -230,6 +233,7 @@ class Html
                 '&' . $this->limit . '=' . $this->getLimit() .
                 '&' . $this->page . '=' . 1 .
                 '&' . $this->pattern . '=' . $this->getPattern() .
+                '&pre_order_by=' . ($_GET[$this->orderBy] ?? $this->defaultOrderBy) .
                 $this->getAHREFForAdditionalAttributes($cols) .
                 '&q=false' . '">' .
                 '    <span class="listing-page">' . 1 . '</span>' .
@@ -246,6 +250,7 @@ class Html
                     '&' . $this->limit . '=' . $this->getLimit() .
                     '&' . $this->page . '=' . $i .
                     '&' . $this->pattern . '=' . $this->getPattern() .
+                    '&pre_order_by=' . ($_GET[$this->orderBy] ?? $this->defaultOrderBy) .
                     $this->getAHREFForAdditionalAttributes($cols) .
                     '&q=false' . '">' .
                     '    <span class="listing-page">' . $i . '</span>' .
@@ -260,6 +265,7 @@ class Html
                 '&' . $this->limit . '=' . $this->getLimit() .
                 '&' . $this->page . '=' . $lastPage .
                 '&' . $this->pattern . '=' . $this->getPattern() .
+                '&pre_order_by=' . ($_GET[$this->orderBy] ?? $this->defaultOrderBy) .
                 $this->getAHREFForAdditionalAttributes($cols) .
                 '&q=false' . '">' .
                 '    <span class="listing-page">' . $lastPage . '</span>' .
@@ -294,6 +300,7 @@ class Html
                 '&' . $this->limit . '=' . $this->getLimit() .
                 '&' . $this->page . '=' . $this->getPage() .
                 '&' . $this->pattern . '=' . $this->getPattern() .
+                '&pre_order_by=' . ($_GET[$this->orderBy] ?? $this->defaultOrderBy) .
                 $this->getAHREFForAdditionalAttributes($cols) .
                 '">' . $col->getName() . '</a>'
             : $col->getName();
@@ -397,11 +404,22 @@ class Html
 	/**
 	 * @return string
 	 */
-	public function getOrder(): string {
-		return isset($_GET[$this->order])
-            ? isset($_GET[$this->orderBy]) && $_GET[$this->orderBy] != ''
+	private function getOrder(): string {
+	    //get default value
+        if (!isset($_GET[$this->order])) {
+            return strtoupper($this->defaultOrder) == self::ORDER_ASC
+                ? self::ORDER_DESC
+                : self::ORDER_ASC;
+        }
+
+        //order was already setted
+        if (isset($this->workingOrder))
+            return $this->workingOrder;
+
+		return isset($_GET['pre_order_by'])
+            ? $_GET['pre_order_by'] === $this->getOrderBy()
                 ? $this->switchOrder()
-                : $this->defaultOrder
+                : $_GET[$this->order]
 			: $this->defaultOrder;
 	}
 
@@ -445,7 +463,8 @@ class Html
             '      <input type="hidden" name="' . $this->order . '" value="' . $this->getOrder() . '" />' . self::PHP_EOL .
             '      <input type="hidden" name="' . $this->limit . '" value="' . $this->getLimit() . '" />' . self::PHP_EOL .
             '      <input type="hidden" name="' . $this->page . '" value="' . $this->getPage() . '" />' . self::PHP_EOL .
-            '      <input type="hidden" name="' . $this->pattern . '" value="' . $this->getPattern() . '" />' . self::PHP_EOL;
+            '      <input type="hidden" name="' . $this->pattern . '" value="' . $this->getPattern() . '" />' . self::PHP_EOL .
+            '      <input type="hidden" name="pre_order_by" value="' . ($_GET[$this->orderBy] ?? $this->defaultOrderBy) . '" />' . self::PHP_EOL;
     }
 
     /**
@@ -494,6 +513,8 @@ class Html
         return $this;
     }
 
+    /** @var bool $switchedOrder */
+    private $switchedOrder = FALSE;
     /**
      * switch from DESC to ASC and back
      * @return string
@@ -505,9 +526,15 @@ class Html
         if (isset($_GET['q']))
             return $_GET[$this->order];
 
-        return $_GET[$this->order] == self::ORDER_ASC
+        if ($this->switchedOrder) {
+            return $_GET[$this->order];
+        }
+        $this->switchedOrder = TRUE;
+
+        $this->workingOrder = $_GET[$this->order] == self::ORDER_ASC
             ? self::ORDER_DESC
             : self::ORDER_ASC;
+        return $this->workingOrder;
     }
 
     /**

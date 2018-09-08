@@ -106,6 +106,15 @@ class Table
      *      'css' => [bool],
      *      'defaultOrder' => [string],
      *      'defaultOrderBy' => [string],
+     *      'translations' => [
+     *          'Show navigation row' => [string],
+     *          'Hide navigation row' => [string],
+     *          'From' => [string],
+     *          'To' => [string],
+     *          'pattern' => [string],
+     *          'of' => [string],
+     *          'Search by' => [string],
+     *      ]
      * );
      * @return string HTML output
      * @throws \Exception
@@ -114,6 +123,7 @@ class Table
     {
         if (isset($config['defaultOrder'])) $this->htmlTable->setDefaultOrder($config['defaultOrder']);
         if (isset($config['defaultOrderBy'])) $this->htmlTable->setDefaultOrderBy($config['defaultOrderBy']);
+        if (isset($config['translations'])) $this->htmlTable->setTranslations($config['translations']);
 
         $table = \Donquixote\Cellbrush\Table\Table::create();
 
@@ -256,6 +266,6 @@ class Table
             ? $this->htmlTable->filterRows($this->rows, $this->cols)
             : $this->rows;
         $this->htmlTable->setItemsCnt($this->itemsCount ?? count($rows));
-        return ($this->statusBarItems > 0 ? $this->htmlTable->getStatusBar($this->statusBarItems) : '') . $this->htmlTable->getListing($this->cols, $rows, $this->itemsCount);
+        return ($this->statusBarItems > 0 ? $this->htmlTable->getStatusBar($this->itemsCount ?? count($rows)) : '') . $this->htmlTable->getListing($this->cols, $rows, $this->itemsCount);
     }
 }

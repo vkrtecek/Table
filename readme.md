@@ -149,6 +149,24 @@ Column can has it's own HTML class
 $table->addColumn('ColName')->setClass('red');
 ```
 
+#### Column filtering
+Also for filtering by one single column, there is method ```setSoloSearchable()``` which pass string - URL attribute:
+```php
+$table->addColumn('Name')->setSoloSearchable('url_name')->setContent('name');
+```
+will after any table action show URL like
+```http://my_Server/?...url_name=<value>```
+and similar for date column
+```php
+$table->addColumn('Name')->setDateFromToSearchable('url_from', 'url_to')->setContent('birthade');
+```
+the URL will look like
+```http://my_Server/?...url_from=<val_from>&url_to=<val_to>```
+for filtering column by "between dates".
+
+If one of these filters are set, the button for show/hide the navigation row will appear above the table. If the "SHOW" button is clicked, navigation row will appear as the second THEAD row.
+
+
 #### Additional
 If we want to sort and filter data by framework (e.g. QueryBuilder) and pass to table only filtered result set, call
 ```php
@@ -172,19 +190,17 @@ $table->setNavigationNames([
 will cause the URL will look after some table click action like 
 ```http://my_Server/?cust_order_by=Name&cust_order=ASC&cust_limit=5&cust_page=1&cust_pattern=```
 
-#### Column filtering
-Also for filtering by one single column, there is method ```setSoloSearchable()``` which pass string - URL attribute:
+Table is now multilingual and you can pass your own translations:
 ```php
-$table->addColumn('Name')->setSoloSearchable('url_name')->setContent('name');
+$table->renderHTML([
+    'translations => [
+        'Show navigation bar' => [string],  //button content
+        'Hide navigation bar' => [string],  //button content
+        'Search by' => [string],            //above table input's content
+        'From' => [string],                 //in navigation row for dates
+        'To' => [string],                   //in navigation row for dates
+        'pattern' => [string],              //in navigation row for string searches
+        'of' => [string],                   //in status bar (1 - 15 of 365)
+    ]
+]);
 ```
-will after any table action show URL like
-```http://my_Server/?...url_name=<value>```
-and similar for date column
-```php
-$table->addColumn('Name')->setDateFromToSearchable('url_from', 'url_to')->setContent('birthade');
-```
-the URL will look like
-```http://my_Server/?...url_from=<val_from>&url_to=<val_to>```
-for filtering column by "between dates".
-
-If one of these filters are set, the button for show/hide the navigation row will appear above the table. If the "SHOW" button is clicked, navigation row will appear as the second THEAD row.

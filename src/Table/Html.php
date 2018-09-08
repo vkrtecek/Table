@@ -39,6 +39,25 @@ class Html
 	private $workingOrder;
 	const DEFAULT_PATTERN = '';
 
+	//translations
+	const DEFAULT_TR = [
+	    'SEARCH_BY' => 'Search by',
+        'SHOW_BUTTON' => 'Show navigation row',
+        'HIDE_BUTTON' => 'Hide navigation row',
+        'FROM' => 'From',
+        'TO' => 'To',
+        'PATTERN' => 'pattern',
+        'OF' => 'of',
+    ];
+	private $tr_Search_by;
+    private $tr_Show_navigation_row;
+    private $tr_Hide_navigation_row;
+    private $tr_From;
+    private $tr_To;
+    private $tr_pattern;
+    private $tr_of;
+
+
     /**
      * Html constructor.
      * @param Table $table
@@ -48,7 +67,31 @@ class Html
 		$this->table = $table;
 		$this->defaultLimit = $showingRows > 0 ? $showingRows : 15;
 		$this->url = 'http://' . $_SERVER['HTTP_HOST'];
+
+		//translations
+        $this->tr_Search_by = self::DEFAULT_TR['SEARCH_BY'];
+        $this->tr_Show_navigation_row = self::DEFAULT_TR['SHOW_BUTTON'];
+        $this->tr_Hide_navigation_row = self::DEFAULT_TR['HIDE_BUTTON'];
+        $this->tr_From = self::DEFAULT_TR['FROM'];
+        $this->tr_To = self::DEFAULT_TR['TO'];
+        $this->tr_pattern = self::DEFAULT_TR['PATTERN'];
+        $this->tr_of = self::DEFAULT_TR['OF'];
 	}
+
+    /**
+     * @param array $tr
+     * @return Html
+     */
+	public function setTranslations(array $tr): Html {
+        $this->tr_Search_by = $tr['Search by'] ?? self::DEFAULT_TR['SEARCH_BY'];
+        $this->tr_Show_navigation_row = $tr['Show navigation row'] ?? self::DEFAULT_TR['SHOW_BUTTON'];
+        $this->tr_Hide_navigation_row = $tr['Hide navigation row'] ?? self::DEFAULT_TR['HIDE_BUTTON'];
+        $this->tr_From = $tr['From'] ?? self::DEFAULT_TR['FROM'];
+        $this->tr_To = $tr['To'] ?? self::DEFAULT_TR['TO'];
+        $this->tr_pattern = $tr['pattern'] ?? self::DEFAULT_TR['PATTERN'];
+        $this->tr_of = $tr['of'] ?? self::DEFAULT_TR['OF'];
+	    return $this;
+    }
 
 	/**
      * @param bool $searchShowButton
@@ -57,7 +100,7 @@ class Html
 	 */
 	public function getNavigation(array $columns, bool $searchShowButton): string
 	{
-		$placeholder = 'Search by';
+		$placeholder = $this->tr_Search_by;
 		$_c = [];
 		foreach ($columns as $column)
 			if ($column->isSearchable())
@@ -70,7 +113,7 @@ class Html
 		//add inputs for additional attributes witch are searchable
         $inputsForAdditionalAttributes = $this->getInputsForAdditionalAttributes($columns);
 
-		$patternInputType = $placeholder == 'Search by' ? 'hidden' : 'text';
+		$patternInputType = $placeholder == $this->tr_Search_by ? 'hidden' : 'text';
 		$limitInputType = $this->table->hasListing() ? 'number' : 'hidden';
 		return self::PHP_EOL .
             '  <div id="table-navigation-forms">' . self::PHP_EOL .
@@ -88,8 +131,8 @@ class Html
             '  </div>' . self::PHP_EOL .
 
             ($searchShowButton
-                ? self::PHP_EOL . '<button id="show_navigation" onclick="toggleNavigationRow(\'show\')">Show navigation row</button>' . self::PHP_EOL .
-                    '<button id="hide_navigation" onclick="toggleNavigationRow(\'hide\')">Hide navigation row</button>' . self::PHP_EOL
+                ? self::PHP_EOL . '<button id="show_navigation" onclick="toggleNavigationRow(\'show\')">' . $this->tr_Show_navigation_row . '</button>' . self::PHP_EOL .
+                    '<button id="hide_navigation" onclick="toggleNavigationRow(\'hide\')">' . $this->tr_Hide_navigation_row . '</button>' . self::PHP_EOL
                 : ''
             ) . self::PHP_EOL;
 	}
@@ -283,7 +326,7 @@ class Html
 	    $lastItem = min($this->getLimit() * $this->getPage(), $totalItems);
 	    return
             '<div id="statusBar">' . self::PHP_EOL .
-                $firstItem . ' - ' . $lastItem . ' of ' . $totalItems . self::PHP_EOL .
+                $firstItem . ' - ' . $lastItem . ' ' . $this->tr_of . ' ' . $totalItems . self::PHP_EOL .
             '</div>' . self::PHP_EOL;
     }
 
@@ -437,10 +480,10 @@ class Html
      */
     public function generateDateFromToSearchCell(Column $col): string {
         return
-            '      <label for="date_from">From: </label>' . self::PHP_EOL .
+            '      <label for="date_from">' . $this->tr_From . ': </label>' . self::PHP_EOL .
             '      <input type="datetime-local" name="' . $col->getDateFromToSearchable()['from'] . '" value="' . $col->getDateFromToSearchableVal('from') . '" id="date_from" />' . self::PHP_EOL .
             '      <br />' . self::PHP_EOL .
-            '      <label for="date_to">To: </label>' . self::PHP_EOL .
+            '      <label for="date_to">' . $this->tr_To . ': </label>' . self::PHP_EOL .
             '      <input type="datetime-local" name="' . $col->getDateFromToSearchable()['to'] . '" value="' . $col->getDateFromToSearchableVal('to') . '" id="date_to" />' . self::PHP_EOL;
     }
 
@@ -450,7 +493,7 @@ class Html
      * @return string
      */
     public function generateSoloSearchCell(Column $col): string {
-        return '      <input type="text" name="' . $col->getSoloSearchable() . '" value="' . $col->getSoloSearchableVal() . '" placeholder="pattern" />' . self::PHP_EOL;
+        return '      <input type="text" name="' . $col->getSoloSearchable() . '" value="' . $col->getSoloSearchableVal() . '" placeholder="' . $this->tr_pattern . '" />' . self::PHP_EOL;
     }
 
     /**

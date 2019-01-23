@@ -434,7 +434,7 @@ class Html
 		if ($this->itemsCnt === NULL)
 		    return $page;
 		else //if user is on nth page and filter, so no item will be on current nth page ---> set page to first
-		    return (($page-1) * $this->getLimit() + 1 >= $this->itemsCnt) ? 1 : $page;
+		    return (($page-1) * $this->getLimit() + 1 > $this->itemsCnt) ? 1 : $page;
 	}
 
 	/**

@@ -181,9 +181,9 @@ class Table
         return '<div id="users-table">' .
                 (isset($config['css']) && $config['css'] ? '<style type="text/css">' . $this->renderCSS() . '</style>' : '') .
                 $this->printNavigation($someColumnSearch) .
-                $this->htmlTable->getStartOfPostForm() .
+                //$this->htmlTable->getStartOfPostForm() .
                 $table->render() .
-                $this->htmlTable->getEndOfPostForm() .
+                //$this->htmlTable->getEndOfPostForm() .
                 $this->printListing() .
                 $this->htmlTable->printScripts() .
             '</div>';
